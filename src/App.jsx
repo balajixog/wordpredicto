@@ -1,6 +1,17 @@
 import React from 'react'
-
+import { languages } from './language'
 export default function AssemblyEndgame(){
+  const languageElements=languages.map(
+    lang=>{
+      const styles = {
+            backgroundColor: lang.backgroundColor,
+            color: lang.color
+        }
+      return(
+         <span style={styles} id={lang.name} className='chips'>{lang.name}</span>
+      )
+    }
+  )
   return(
       <main>
         <header>
@@ -8,6 +19,13 @@ export default function AssemblyEndgame(){
                 <p>Guess the word within 8 attempts to keep the 
                 programming world safe from Assembly!</p>
         </header>
+        <section className='game-status'>
+          <h2>you win!</h2>
+          <p>Well done! 🎉</p>
+        </section> 
+        <section className='language-chips'>
+          {languageElements}
+        </section>
       </main>
   )
 }
