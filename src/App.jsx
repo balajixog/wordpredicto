@@ -1,6 +1,10 @@
-import React from 'react'
+import  {useState} from 'react'
+import {clsx} from "clsx"
 import { languages } from './language'
 export default function AssemblyEndgame(){
+  const[currentWord , setCurrentWord]= useState("react");
+  const[guessedLetters,setGuessedLetters] = useState([]);
+  const alphabet ="abcdefghijklmnopqrstuvwxyz"
   const languageElements=languages.map(
     lang=>{
       const styles = {
@@ -12,6 +16,37 @@ export default function AssemblyEndgame(){
       )
     }
   )
+  function addGuessedLetters(letter){
+      setGuessedLetters(prevLetters =>
+        prevLetters.includes(letter) ? prevLetters : [...prevLetters,letter])
+  }
+
+  const letterElements = currentWord.split("").map((letter,index)=>(
+    <span key={index}>{guessedLetters.includes(letter)?letter.toUpperCase():""}</span>
+  ))
+ 
+  const keyboardElements=alphabet.split("").map(letter=>{
+    const isGuessed=guessedLetters.includes(letter)
+    const isCorrect= isGuessed && currentWord.includes(letter)
+    const isWrong=  isGuessed && !currentWord.includes(letter)
+
+    const className=clsx(
+      {
+        correct: isCorrect,
+        wrong: isWrong
+      }
+    )
+
+    return(
+    <button key={letter} className={className}
+      onClick={()=>addGuessedLetters(letter)}>{letter.toUpperCase()
+      }
+      </button>
+    )
+  }  
+  )
+
+
   return(
       <main>
         <header>
@@ -26,6 +61,13 @@ export default function AssemblyEndgame(){
         <section className='language-chips'>
           {languageElements}
         </section>
+        <section className='word'>
+         {letterElements}
+        </section>
+        <section className='keyboard'>
+        {keyboardElements}
+        </section>
+        <button className="new-game">New Game</button>
       </main>
   )
 }
