@@ -37,6 +37,12 @@ section.game-status {
   border-radius: 5px;
   margin-block: 30px;
 }
+section.game-status.won{
+  background-color: #10A95B;
+}
+section.game-status.lost{
+  background-color: #BA2A2A;
+}
 section.game-status > h1{
   margin: 5px;
   font-size: 1.25rem;
@@ -54,9 +60,23 @@ section.language-chips{
   justify-content: center;
   max-width: 450px;
 }
-span.chips{
+span.chip{
   border-radius: 5px;
   padding: 4.5px;
+  position: relative;
+}
+span.chip.lost::before {  /*without content before nothing*/
+    content: "💀";
+    position: absolute;   /*over the parent element(relative)*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    font-size: 0.85rem;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.7);
 }
 section.word{
 margin: 20px;
@@ -111,3 +131,5 @@ button.new-game {
     margin-inline: auto; /* margin-left,margin-right: auto like that*/
     cursor: pointer;
 }
+
+

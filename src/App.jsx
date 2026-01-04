@@ -2,23 +2,38 @@ import  {useState} from 'react'
 import {clsx} from "clsx"
 import { languages } from './language'
 export default function AssemblyEndgame(){
+  // State values
   const[currentWord , setCurrentWord]= useState("react");
   const[guessedLetters,setGuessedLetters] = useState([]);
+  const [wrongGuessCount, setWrongGuessCount] = useState(0);
+
+      // Derived values
+    //     const wrongGuessCount = 
+    //     guessedLetters.filter(letter => !currentWord.includes(letter)).length   //it stores number of wrong guesses put it  in the array 
+    // console.log(wrongGuessCount)
+
+    
+    // Static values
   const alphabet ="abcdefghijklmnopqrstuvwxyz"
   const languageElements=languages.map(
-    lang=>{
+    (lang,index)=>{
       const styles = {
             backgroundColor: lang.backgroundColor,
             color: lang.color
         }
+        // const className = clsx("chip", wrongGuessCount > index && "lost")     another way to write
       return(
-         <span style={styles} id={lang.name} className='chips'>{lang.name}</span>
+         <span style={styles} id={lang.name} className={`chip ${wrongGuessCount > index ? 'lost' : ''}`}>{lang.name}</span>   //write the classname={className}
       )
     }
   )
   function addGuessedLetters(letter){
       setGuessedLetters(prevLetters =>
         prevLetters.includes(letter) ? prevLetters : [...prevLetters,letter])
+
+        if (!currentWord.includes(letter)) {
+          setWrongGuessCount(prevCount => prevCount + 1);
+        }
   }
 
   const letterElements = currentWord.split("").map((letter,index)=>(
@@ -36,7 +51,8 @@ export default function AssemblyEndgame(){
         wrong: isWrong
       }
     )
-
+      console.log(wrongGuessCount)
+  
     return(
     <button key={letter} className={className}
       onClick={()=>addGuessedLetters(letter)}>{letter.toUpperCase()
@@ -45,7 +61,14 @@ export default function AssemblyEndgame(){
     )
   }  
   )
+  const isGamewon = currentWord.split("").every(letter => guessedLetters.includes(letter))
+  const isGameLost = wrongGuessCount >= languages.length-1
+  const isGameOver = isGamewon || isGameLost
 
+  const gameStatusClass=clsx("game-status",{
+    won: isGamewon,
+    lost: isGameLost
+  })
 
   return(
       <main>
@@ -54,10 +77,31 @@ export default function AssemblyEndgame(){
                 <p>Guess the word within 8 attempts to keep the 
                 programming world safe from Assembly!</p>
         </header>
-        <section className='game-status'>
+        <section className={gameStatusClass}>
+          {
+            //nested ternary operator
+          isGameOver?(
+          isGamewon?
+            (
+            <>
           <h2>you win!</h2>
           <p>Well done! 🎉</p>
+          </>
+          )
+          : (
+          <>
+          <h2>you lose!</h2>
+          <p>Try again! 😭</p>
+          </>
+          )
+        ):(
+          null
+        )
+          }
+
         </section> 
+
+
         <section className='language-chips'>
           {languageElements}
         </section>
@@ -67,7 +111,7 @@ export default function AssemblyEndgame(){
         <section className='keyboard'>
         {keyboardElements}
         </section>
-        <button className="new-game">New Game</button>
+        {isGameOver && <button className="new-game">New Game</button>}
       </main>
   )
 }
