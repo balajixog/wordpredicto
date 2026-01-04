@@ -69,6 +69,27 @@ export default function AssemblyEndgame(){
     won: isGamewon,
     lost: isGameLost
   })
+  // function renderGameStatus() {
+  //       if (!isGameOver) {
+  //           return null
+  //       }
+
+  //       if (isGameWon) {
+  //           return (
+  //               <>
+  //                   <h2>You win!</h2>
+  //                   <p>Well done! 🎉</p>
+  //               </>
+  //           )
+  //       } else {
+  //           return (
+  //               <>
+  //                   <h2>Game over!</h2>
+  //                   <p>You lose! Better start learning Assembly 😭</p>
+  //               </>
+  //           )
+  //       }
+  // }
 
   return(
       <main>
