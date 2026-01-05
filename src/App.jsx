@@ -10,12 +10,15 @@ export default function AssemblyEndgame(){
   // State values
   const[currentWord , setCurrentWord]= useState("react");
   const[guessedLetters,setGuessedLetters] = useState([]);
-  const [wrongGuessCount, setWrongGuessCount] = useState(0);
+  
+
+  const wrongGuessCount = guessedLetters.filter(letter => !currentWord.includes(letter)).length
 
       // Derived values
     //     const wrongGuessCount = 
     //     guessedLetters.filter(letter => !currentWord.includes(letter)).length   //it stores number of wrong guesses put it  in the array 
     // console.log(wrongGuessCount)
+    const numGuessesLeft = languages.length - 1
     const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
     const isLastGuessIncorrect = lastGuessedLetter && !currentWord.includes(lastGuessedLetter)
     
@@ -37,12 +40,12 @@ export default function AssemblyEndgame(){
       setGuessedLetters(prevLetters =>
         prevLetters.includes(letter) ? prevLetters : [...prevLetters,letter])
 
-        if (!currentWord.includes(letter)) {
-          setWrongGuessCount(prevCount => prevCount + 1);
-        }
+        
   }
-
-  const letterElements = currentWord.split("").map((letter,index)=>(
+     const isGameWon = currentWord.split("").every(letter => guessedLetters.includes(letter))
+     const isGameLost = wrongGuessCount >= languages.length-1
+     const isGameOver = isGameWon || isGameLost
+     const letterElements = currentWord.split("").map((letter,index)=>(
     <span key={index}>{guessedLetters.includes(letter)?letter.toUpperCase():""}</span>
   ))
  
@@ -57,22 +60,25 @@ export default function AssemblyEndgame(){
         wrong: isWrong
       }
     )
-      console.log(wrongGuessCount)
+    
   
     return(
-    <button key={letter} className={className}
-      onClick={()=>addGuessedLetters(letter)}>{letter.toUpperCase()
+    <button disabled={isGameOver} 
+    aria-disabled={guessedLetters.includes(letter)}
+    aria-label={`Letter ${letter}`}
+    key={letter} 
+    className={className} 
+    onClick={()=>addGuessedLetters(letter)}>{letter.toUpperCase()
       }
       </button>
     )
   }  
   )
-  const isGamewon = currentWord.split("").every(letter => guessedLetters.includes(letter))
-  const isGameLost = wrongGuessCount >= languages.length-1
-  const isGameOver = isGamewon || isGameLost
+
+  
 
   const gameStatusClass=clsx("game-status",{
-    won: isGamewon,
+    won: isGameWon,
     lost: isGameLost,
     farewell: !isGameOver && isLastGuessIncorrect
   })
@@ -110,7 +116,7 @@ export default function AssemblyEndgame(){
             )
         }
 
-        if (isGamewon) {
+        if (isGameWon) {
             return (
                 <>
                     <h2>You win!</h2>
@@ -122,7 +128,7 @@ export default function AssemblyEndgame(){
             return (
                 <>
                     <h2>Game over!</h2>
-                    <p>You lose! Better start learning Assembly 😭</p>
+                    <p>You lose! Better try again😭</p>
                 </>
             )
         }
@@ -132,7 +138,7 @@ export default function AssemblyEndgame(){
 
 //firework confetti
   useEffect(() => {
-  if (!isGamewon) return;
+  if (!isGameWon) return;
 
   const duration = 2 * 1000;
   const end = Date.now() + duration;
@@ -155,20 +161,40 @@ export default function AssemblyEndgame(){
       requestAnimationFrame(frame);
     }
   })();
-}, [isGamewon]);
+}, [isGameWon]);
 
 
   return(
       <main>
-      {/* {isGamewon && <Confetti />} */}
+      {/* {isGameWon && <Confetti />} */}
         <header>
           <h1>Assembly: Endgame</h1>
                 <p>Guess the word within 8 attempts to keep the 
                 programming world safe from Assembly!</p>
         </header>
-        <section className={gameStatusClass}>
+        <section className={gameStatusClass} 
+        aria-live="polite" 
+        role="status" >
                 {renderGameStatus()}
             </section>
+            {/* Combined visually-hidden aria-live region for status updates */}
+         <section 
+                className="sr-only" 
+                aria-live="polite" 
+                role="status"
+            >
+              <p>
+                    {currentWord.includes(lastGuessedLetter) ? 
+                        `Correct! The letter ${lastGuessedLetter} is in the word.` : 
+                        `Sorry, the letter ${lastGuessedLetter} is not in the word.`
+                    }
+                    You have {numGuessesLeft} attempts left.
+                </p>
+                <p>Current word: {currentWord.split("").map(letter => 
+                guessedLetters.includes(letter) ? letter + "." : "blank.")
+                .join(" ")}</p>
+            
+            </section>    
         <section className='language-chips'>
           {languageElements}
         </section>
