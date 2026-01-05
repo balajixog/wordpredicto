@@ -1,6 +1,11 @@
 import  {useState} from 'react'
 import {clsx} from "clsx"
 import { languages } from './language'
+import { getFarewellText } from './utils';  
+import confetti from "canvas-confetti";
+
+// import Confetti from 'react-confetti'
+import { useEffect } from "react";
 export default function AssemblyEndgame(){
   // State values
   const[currentWord , setCurrentWord]= useState("react");
@@ -11,7 +16,8 @@ export default function AssemblyEndgame(){
     //     const wrongGuessCount = 
     //     guessedLetters.filter(letter => !currentWord.includes(letter)).length   //it stores number of wrong guesses put it  in the array 
     // console.log(wrongGuessCount)
-
+    const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
+    const isLastGuessIncorrect = lastGuessedLetter && !currentWord.includes(lastGuessedLetter)
     
     // Static values
   const alphabet ="abcdefghijklmnopqrstuvwxyz"
@@ -67,8 +73,10 @@ export default function AssemblyEndgame(){
 
   const gameStatusClass=clsx("game-status",{
     won: isGamewon,
-    lost: isGameLost
+    lost: isGameLost,
+    farewell: !isGameOver && isLastGuessIncorrect
   })
+     
   // function renderGameStatus() {
   //       if (!isGameOver) {
   //           return null
@@ -91,38 +99,76 @@ export default function AssemblyEndgame(){
   //       }
   // }
 
+      function renderGameStatus() {
+        if (!isGameOver && isLastGuessIncorrect) {
+            return (
+                <p 
+                    className="farewell-message"
+                >
+                    {getFarewellText(languages[wrongGuessCount - 1].name)}
+                </p>
+            )
+        }
+
+        if (isGamewon) {
+            return (
+                <>
+                    <h2>You win!</h2>
+                    <p>Well done! 🎉</p>
+                </>
+            )
+        } 
+        if (isGameLost) {
+            return (
+                <>
+                    <h2>Game over!</h2>
+                    <p>You lose! Better start learning Assembly 😭</p>
+                </>
+            )
+        }
+        
+        return null
+    }
+
+//firework confetti
+  useEffect(() => {
+  if (!isGamewon) return;
+
+  const duration = 2 * 1000;
+  const end = Date.now() + duration;
+
+  (function frame() {
+    confetti({
+      particleCount: 5,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 }
+    });
+    confetti({
+      particleCount: 5,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 }
+    });
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  })();
+}, [isGamewon]);
+
+
   return(
       <main>
+      {/* {isGamewon && <Confetti />} */}
         <header>
           <h1>Assembly: Endgame</h1>
                 <p>Guess the word within 8 attempts to keep the 
                 programming world safe from Assembly!</p>
         </header>
         <section className={gameStatusClass}>
-          {
-            //nested ternary operator
-          isGameOver?(
-          isGamewon?
-            (
-            <>
-          <h2>you win!</h2>
-          <p>Well done! 🎉</p>
-          </>
-          )
-          : (
-          <>
-          <h2>you lose!</h2>
-          <p>Try again! 😭</p>
-          </>
-          )
-        ):(
-          null
-        )
-          }
-
-        </section> 
-
-
+                {renderGameStatus()}
+            </section>
         <section className='language-chips'>
           {languageElements}
         </section>
