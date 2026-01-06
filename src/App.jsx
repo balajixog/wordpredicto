@@ -2,13 +2,13 @@ import  {useState} from 'react'
 import {clsx} from "clsx"
 import { languages } from './language'
 import { getFarewellText } from './utils';  
+import { getRandomWord } from './utils';
+import Confetti from 'react-confetti';
 import confetti from "canvas-confetti";
-
-// import Confetti from 'react-confetti'
-import { useEffect } from "react";
+import { useEffect } from 'react';
 export default function AssemblyEndgame(){
   // State values
-  const[currentWord , setCurrentWord]= useState("react");
+  const[currentWord , setCurrentWord]= useState(() =>getRandomWord());
   const[guessedLetters,setGuessedLetters] = useState([]);
   
 
@@ -45,14 +45,24 @@ export default function AssemblyEndgame(){
      const isGameWon = currentWord.split("").every(letter => guessedLetters.includes(letter))
      const isGameLost = wrongGuessCount >= languages.length-1
      const isGameOver = isGameWon || isGameLost
-     const letterElements = currentWord.split("").map((letter,index)=>(
-    <span key={index}>{guessedLetters.includes(letter)?letter.toUpperCase():""}</span>
-  ))
+
+
+     const letterElements = currentWord.split("").map((letter,index)=>{
+     const shouldRevealLetter = isGameLost || guessedLetters.includes(letter)
+     const letterClassName = clsx(
+            isGameLost && !guessedLetters.includes(letter) && "missed-letter"
+        )
+      return(
+     <span key={index} className={letterClassName}>
+                {shouldRevealLetter ? letter.toUpperCase() : ""}
+     </span>
+      )}
+)
  
-  const keyboardElements=alphabet.split("").map(letter=>{
-    const isGuessed=guessedLetters.includes(letter)
-    const isCorrect= isGuessed && currentWord.includes(letter)
-    const isWrong=  isGuessed && !currentWord.includes(letter)
+    const keyboardElements=alphabet.split("").map(letter=>{
+      const isGuessed=guessedLetters.includes(letter)
+      const isCorrect= isGuessed && currentWord.includes(letter)
+      const isWrong=  isGuessed && !currentWord.includes(letter)
 
     const className=clsx(
       {
@@ -75,36 +85,16 @@ export default function AssemblyEndgame(){
   }  
   )
 
-  
+  function startNewGame() {
+        setCurrentWord(getRandomWord())
+        setGuessedLetters([])
+    }
 
   const gameStatusClass=clsx("game-status",{
     won: isGameWon,
     lost: isGameLost,
     farewell: !isGameOver && isLastGuessIncorrect
   })
-     
-  // function renderGameStatus() {
-  //       if (!isGameOver) {
-  //           return null
-  //       }
-
-  //       if (isGameWon) {
-  //           return (
-  //               <>
-  //                   <h2>You win!</h2>
-  //                   <p>Well done! 🎉</p>
-  //               </>
-  //           )
-  //       } else {
-  //           return (
-  //               <>
-  //                   <h2>Game over!</h2>
-  //                   <p>You lose! Better start learning Assembly 😭</p>
-  //               </>
-  //           )
-  //       }
-  // }
-
       function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
             return (
@@ -135,40 +125,82 @@ export default function AssemblyEndgame(){
         
         return null
     }
+//for lost
+  function antiConfetti() {
+  confetti({
+    particleCount: 500,
+    spread: 60,
+    angle: 90,
+    gravity: 1.5,
+    colors: ["#BA2A2A", "#000000"],
+    shapes: ["circle"],
+    origin: { y: 0.4 }  //gin: { x: 0.5, y: 0 }
+  });
+}
 
-//firework confetti
-  useEffect(() => {
-  if (!isGameWon) return;
+//emoji confetti
+// function antiConfetti() {
+//   const skull = confetti.shapeFromText({
+//     text: "💀",
+//     scalar: 2.2
+//   });
 
-  const duration = 2 * 1000;
-  const end = Date.now() + duration;
+//   confetti({
+//     particleCount: 40,
+//     angle: 90,
+//     spread: 120,
+//     gravity: 1.6,
+//     origin: { y: 0 },
+//     shapes: [skull]
+//   });
+// }
 
-  (function frame() {
-    confetti({
-      particleCount: 5,
-      angle: 60,
-      spread: 55,
-      origin: { x: 0 }
-    });
-    confetti({
-      particleCount: 5,
-      angle: 120,
-      spread: 55,
-      origin: { x: 1 }
-    });
 
-    if (Date.now() < end) {
-      requestAnimationFrame(frame);
-    }
-  })();
-}, [isGameWon]);
+useEffect(() => {
+  if (isGameLost) {
+    antiConfetti();
+  }
+}, [isGameLost]);
+
+//brust confetti
+//   useEffect(() => {
+//   if (!isGameWon) return;
+
+//   const duration = 2 * 1000;
+//   const end = Date.now() + duration;
+
+//   (function frame() {
+//     confetti({
+//       particleCount: 5,
+//       angle: 60,
+//       spread: 55,
+//       origin: { x: 0 }
+//     });
+//     confetti({
+//       particleCount: 5,
+//       angle: 120,
+//       spread: 55,
+//       origin: { x: 1 }
+//     });
+
+//     if (Date.now() < end) {
+//       requestAnimationFrame(frame);
+//     }
+//   })();
+// }, [isGameWon]);
 
 
   return(
       <main>
-      {/* {isGameWon && <Confetti />} */}
+      {
+                isGameWon && 
+                    <Confetti
+                        recycle={false}
+                        numberOfPieces={2500}
+                    />
+            }
         <header>
-          <h1>Assembly: Endgame</h1>
+          <h1>WORD PREDICTO !</h1>
                 <p>Guess the word within 8 attempts to keep the 
                 programming world safe from Assembly!</p>
         </header>
@@ -204,7 +236,7 @@ export default function AssemblyEndgame(){
         <section className='keyboard'>
         {keyboardElements}
         </section>
-        {isGameOver && <button className="new-game">New Game</button>}
+        {isGameOver && <button className="new-game" onClick={startNewGame} >New Game</button>}
       </main>
   )
 }
