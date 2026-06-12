@@ -214,7 +214,7 @@ Contributions are welcome. Please follow these guidelines:
 
 ## Author
 
-BALAJI GOVINDAN
+BALAJI G
 
 ## Acknowledgments
 
