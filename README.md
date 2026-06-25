@@ -212,7 +212,7 @@ Contributions are welcome. Please follow these guidelines:
 4. Push to the branch
 5. Open a pull request
 
-## Author
+## Lisence 
 
 BALAJI G
 
